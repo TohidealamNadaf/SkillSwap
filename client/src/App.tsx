@@ -8,9 +8,9 @@ import { Navbar } from "@/components/layout/navbar";
 import NotFound from "@/pages/not-found";
 import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
-import Expenses from "@/pages/expenses";
-import Approvals from "@/pages/approvals";
-import Reports from "@/pages/reports";
+import Skills from "@/pages/skills";
+import Matches from "@/pages/matches";
+import Messages from "@/pages/messages";
 import Profile from "@/pages/profile";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -71,21 +71,21 @@ function Router() {
         </ProtectedRoute>
       </Route>
 
-      <Route path="/expenses">
+      <Route path="/skills">
         <ProtectedRoute>
-          <Expenses />
+          <Skills />
         </ProtectedRoute>
       </Route>
 
-      <Route path="/approvals">
+      <Route path="/matches">
         <ProtectedRoute>
-          <Approvals />
+          <Matches />
         </ProtectedRoute>
       </Route>
 
-      <Route path="/reports">
+      <Route path="/messages">
         <ProtectedRoute>
-          <Reports />
+          <Messages />
         </ProtectedRoute>
       </Route>
 

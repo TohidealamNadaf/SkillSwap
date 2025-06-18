@@ -2,29 +2,25 @@ import { apiRequest } from "./queryClient";
 
 export interface User {
   id: number;
-  username: string;
   email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  department?: string;
+  name: string;
+  bio?: string;
+  location?: string;
   profilePicture?: string;
   createdAt: string;
 }
 
 export interface LoginCredentials {
-  username: string;
+  email: string;
   password: string;
 }
 
 export interface RegisterData {
-  username: string;
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  department?: string;
+  name: string;
+  bio?: string;
+  location?: string;
 }
 
 export async function login(credentials: LoginCredentials): Promise<User> {

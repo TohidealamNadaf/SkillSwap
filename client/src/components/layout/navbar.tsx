@@ -1,10 +1,8 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import { Search, Bell, LogOut, User, Settings } from "lucide-react";
+import { GraduationCap, LayoutDashboard, BookOpen, Users, MessageCircle, LogOut, User } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export function Navbar() {

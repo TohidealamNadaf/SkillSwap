@@ -63,76 +63,100 @@ export class MemStorage implements IStorage {
 
   constructor() {
     this.users = new Map();
-    this.expenses = new Map();
-    this.approvals = new Map();
-    this.teams = new Map();
-    this.teamMembers = new Map();
+    this.skills = new Map();
+    this.matches = new Map();
+    this.sessions = new Map();
+    this.messages = new Map();
+    this.exchanges = new Map();
     this.currentUserId = 1;
-    this.currentExpenseId = 1;
-    this.currentApprovalId = 1;
-    this.currentTeamId = 1;
-    this.currentTeamMemberId = 1;
+    this.currentSkillId = 1;
+    this.currentMatchId = 1;
+    this.currentSessionId = 1;
+    this.currentMessageId = 1;
+    this.currentExchangeId = 1;
 
-    // Initialize with sample users
+    // Initialize with sample data
     this.initializeSampleData();
   }
 
   private initializeSampleData() {
-    const manager: User = {
+    // Sample users
+    const john: User = {
       id: this.currentUserId++,
-      username: "manager",
-      email: "manager@company.com",
+      email: "john@example.com",
       password: "password123",
-      firstName: "John",
-      lastName: "Manager",
-      role: "manager",
-      department: "Real Estate",
+      name: "John Smith",
+      bio: "Software developer passionate about teaching programming and learning design",
       profilePicture: null,
+      location: "San Francisco, CA",
       createdAt: new Date(),
     };
 
-    const agent: User = {
+    const sarah: User = {
       id: this.currentUserId++,
-      username: "agent",
-      email: "agent@company.com",
-      password: "password123",
-      firstName: "Sarah",
-      lastName: "Agent",
-      role: "agent",
-      department: "Real Estate",
+      email: "sarah@example.com",
+      password: "password123", 
+      name: "Sarah Johnson",
+      bio: "UI/UX designer looking to expand my technical skills",
       profilePicture: null,
+      location: "New York, NY",
       createdAt: new Date(),
     };
 
-    this.users.set(manager.id, manager);
-    this.users.set(agent.id, agent);
+    this.users.set(john.id, john);
+    this.users.set(sarah.id, sarah);
 
-    // Create a sample team
-    const team: Team = {
-      id: this.currentTeamId++,
-      name: "Sales Team",
-      managerId: manager.id,
+    // Sample skills
+    const programmingSkill: Skill = {
+      id: this.currentSkillId++,
+      userId: john.id,
+      name: "JavaScript Programming",
+      type: "teach",
+      level: "advanced",
+      description: "Full-stack JavaScript development with React and Node.js",
       createdAt: new Date(),
     };
-    this.teams.set(team.id, team);
 
-    // Add agent to team
-    const teamMember: TeamMember = {
-      id: this.currentTeamMemberId++,
-      teamId: team.id,
-      userId: agent.id,
+    const designSkill: Skill = {
+      id: this.currentSkillId++,
+      userId: sarah.id,
+      name: "UI/UX Design",
+      type: "teach",
+      level: "intermediate",
+      description: "User interface and user experience design principles",
       createdAt: new Date(),
     };
-    this.teamMembers.set(teamMember.id, teamMember);
+
+    const learnProgramming: Skill = {
+      id: this.currentSkillId++,
+      userId: sarah.id,
+      name: "JavaScript Programming",
+      type: "learn",
+      level: "beginner",
+      description: "Want to learn web development fundamentals",
+      createdAt: new Date(),
+    };
+
+    this.skills.set(programmingSkill.id, programmingSkill);
+    this.skills.set(designSkill.id, designSkill);
+    this.skills.set(learnProgramming.id, learnProgramming);
+
+    // Sample match
+    const match: Match = {
+      id: this.currentMatchId++,
+      teacherId: john.id,
+      learnerId: sarah.id,
+      skillId: programmingSkill.id,
+      status: "accepted",
+      createdAt: new Date(),
+    };
+
+    this.matches.set(match.id, match);
   }
 
   // User methods
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
@@ -142,14 +166,12 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const user: User = {
       id: this.currentUserId++,
-      username: insertUser.username,
       email: insertUser.email,
       password: insertUser.password,
-      firstName: insertUser.firstName,
-      lastName: insertUser.lastName,
-      role: insertUser.role || "agent",
-      department: insertUser.department || null,
+      name: insertUser.name,
+      bio: insertUser.bio || null,
       profilePicture: insertUser.profilePicture || null,
+      location: insertUser.location || null,
       createdAt: new Date(),
     };
     this.users.set(user.id, user);
@@ -165,144 +187,186 @@ export class MemStorage implements IStorage {
     return updatedUser;
   }
 
-  // Expense methods
-  async getExpense(id: number): Promise<Expense | undefined> {
-    return this.expenses.get(id);
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
   }
 
-  async getExpensesByUser(userId: number): Promise<Expense[]> {
-    return Array.from(this.expenses.values()).filter(expense => expense.userId === userId);
+  // Skill methods
+  async getSkill(id: number): Promise<Skill | undefined> {
+    return this.skills.get(id);
   }
 
-  async getExpensesByStatus(status: string): Promise<Expense[]> {
-    return Array.from(this.expenses.values()).filter(expense => expense.status === status);
+  async getSkillsByUser(userId: number): Promise<Skill[]> {
+    return Array.from(this.skills.values()).filter(skill => skill.userId === userId);
   }
 
-  async getExpensesByTeam(teamId: number): Promise<Expense[]> {
-    const teamMemberIds = Array.from(this.teamMembers.values())
-      .filter(tm => tm.teamId === teamId)
-      .map(tm => tm.userId);
+  async getSkillsByType(type: string): Promise<Skill[]> {
+    return Array.from(this.skills.values()).filter(skill => skill.type === type);
+  }
+
+  async createSkill(insertSkill: InsertSkill): Promise<Skill> {
+    const skill: Skill = {
+      id: this.currentSkillId++,
+      userId: insertSkill.userId,
+      name: insertSkill.name,
+      type: insertSkill.type,
+      level: insertSkill.level,
+      description: insertSkill.description || null,
+      createdAt: new Date(),
+    };
+    this.skills.set(skill.id, skill);
+    return skill;
+  }
+
+  async updateSkill(id: number, updates: Partial<Skill>): Promise<Skill | undefined> {
+    const skill = this.skills.get(id);
+    if (!skill) return undefined;
     
-    return Array.from(this.expenses.values())
-      .filter(expense => teamMemberIds.includes(expense.userId));
+    const updatedSkill = { ...skill, ...updates };
+    this.skills.set(id, updatedSkill);
+    return updatedSkill;
   }
 
-  async createExpense(insertExpense: InsertExpense): Promise<Expense> {
-    const expense: Expense = {
-      id: this.currentExpenseId++,
-      userId: insertExpense.userId,
-      title: insertExpense.title,
-      description: insertExpense.description || null,
-      amount: insertExpense.amount,
-      category: insertExpense.category,
-      receiptUrl: insertExpense.receiptUrl || null,
-      status: insertExpense.status || "pending",
-      approvedBy: null,
-      approvedAt: null,
-      submittedAt: null,
+  async deleteSkill(id: number): Promise<boolean> {
+    return this.skills.delete(id);
+  }
+
+  // Match methods
+  async getMatch(id: number): Promise<Match | undefined> {
+    return this.matches.get(id);
+  }
+
+  async getMatchesByUser(userId: number): Promise<Match[]> {
+    return Array.from(this.matches.values()).filter(
+      match => match.teacherId === userId || match.learnerId === userId
+    );
+  }
+
+  async getMatchesByStatus(status: string): Promise<Match[]> {
+    return Array.from(this.matches.values()).filter(match => match.status === status);
+  }
+
+  async createMatch(insertMatch: InsertMatch): Promise<Match> {
+    const match: Match = {
+      id: this.currentMatchId++,
+      teacherId: insertMatch.teacherId,
+      learnerId: insertMatch.learnerId,
+      skillId: insertMatch.skillId,
+      status: insertMatch.status || "pending",
+      createdAt: new Date(),
+    };
+    this.matches.set(match.id, match);
+    return match;
+  }
+
+  async updateMatch(id: number, updates: Partial<Match>): Promise<Match | undefined> {
+    const match = this.matches.get(id);
+    if (!match) return undefined;
+    
+    const updatedMatch = { ...match, ...updates };
+    this.matches.set(id, updatedMatch);
+    return updatedMatch;
+  }
+
+  // Session methods
+  async getSession(id: number): Promise<Session | undefined> {
+    return this.sessions.get(id);
+  }
+
+  async getSessionsByMatch(matchId: number): Promise<Session[]> {
+    return Array.from(this.sessions.values()).filter(session => session.matchId === matchId);
+  }
+
+  async getSessionsByUser(userId: number): Promise<Session[]> {
+    const userMatches = await this.getMatchesByUser(userId);
+    const matchIds = userMatches.map(match => match.id);
+    return Array.from(this.sessions.values()).filter(session => 
+      matchIds.includes(session.matchId)
+    );
+  }
+
+  async createSession(insertSession: InsertSession): Promise<Session> {
+    const session: Session = {
+      id: this.currentSessionId++,
+      matchId: insertSession.matchId,
+      scheduledAt: insertSession.scheduledAt,
+      duration: insertSession.duration,
+      status: insertSession.status || "scheduled",
+      notes: insertSession.notes || null,
+      createdAt: new Date(),
+    };
+    this.sessions.set(session.id, session);
+    return session;
+  }
+
+  async updateSession(id: number, updates: Partial<Session>): Promise<Session | undefined> {
+    const session = this.sessions.get(id);
+    if (!session) return undefined;
+    
+    const updatedSession = { ...session, ...updates };
+    this.sessions.set(id, updatedSession);
+    return updatedSession;
+  }
+
+  // Message methods
+  async getMessage(id: number): Promise<Message | undefined> {
+    return this.messages.get(id);
+  }
+
+  async getMessagesByMatch(matchId: number): Promise<Message[]> {
+    return Array.from(this.messages.values())
+      .filter(message => message.matchId === matchId)
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  }
+
+  async createMessage(insertMessage: InsertMessage): Promise<Message> {
+    const message: Message = {
+      id: this.currentMessageId++,
+      matchId: insertMessage.matchId,
+      senderId: insertMessage.senderId,
+      content: insertMessage.content,
+      createdAt: new Date(),
+    };
+    this.messages.set(message.id, message);
+    return message;
+  }
+
+  // Exchange methods
+  async getExchange(id: number): Promise<Exchange | undefined> {
+    return this.exchanges.get(id);
+  }
+
+  async getExchangesByUser(userId: number): Promise<Exchange[]> {
+    return Array.from(this.exchanges.values()).filter(
+      exchange => exchange.userId === userId || exchange.partnerId === userId
+    );
+  }
+
+  async createExchange(insertExchange: InsertExchange): Promise<Exchange> {
+    const exchange: Exchange = {
+      id: this.currentExchangeId++,
+      userId: insertExchange.userId,
+      partnerId: insertExchange.partnerId,
+      hoursGiven: insertExchange.hoursGiven || "0",
+      hoursReceived: insertExchange.hoursReceived || "0",
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    this.expenses.set(expense.id, expense);
-    return expense;
+    this.exchanges.set(exchange.id, exchange);
+    return exchange;
   }
 
-  async updateExpense(id: number, updates: Partial<Expense>): Promise<Expense | undefined> {
-    const expense = this.expenses.get(id);
-    if (!expense) return undefined;
+  async updateExchange(id: number, updates: Partial<Exchange>): Promise<Exchange | undefined> {
+    const exchange = this.exchanges.get(id);
+    if (!exchange) return undefined;
     
-    const updatedExpense = { 
-      ...expense, 
+    const updatedExchange = { 
+      ...exchange, 
       ...updates, 
-      updatedAt: new Date(),
+      updatedAt: new Date() 
     };
-    this.expenses.set(id, updatedExpense);
-    return updatedExpense;
-  }
-
-  async deleteExpense(id: number): Promise<boolean> {
-    return this.expenses.delete(id);
-  }
-
-  // Approval methods
-  async getApproval(id: number): Promise<Approval | undefined> {
-    return this.approvals.get(id);
-  }
-
-  async getApprovalsByExpense(expenseId: number): Promise<Approval[]> {
-    return Array.from(this.approvals.values()).filter(approval => approval.expenseId === expenseId);
-  }
-
-  async getApprovalsByApprover(approverId: number): Promise<Approval[]> {
-    return Array.from(this.approvals.values()).filter(approval => approval.approverId === approverId);
-  }
-
-  async createApproval(insertApproval: InsertApproval): Promise<Approval> {
-    const approval: Approval = {
-      id: this.currentApprovalId++,
-      expenseId: insertApproval.expenseId,
-      approverId: insertApproval.approverId,
-      status: insertApproval.status,
-      comments: insertApproval.comments || null,
-      createdAt: new Date(),
-    };
-    this.approvals.set(approval.id, approval);
-    return approval;
-  }
-
-  async updateApproval(id: number, updates: Partial<Approval>): Promise<Approval | undefined> {
-    const approval = this.approvals.get(id);
-    if (!approval) return undefined;
-    
-    const updatedApproval = { ...approval, ...updates };
-    this.approvals.set(id, updatedApproval);
-    return updatedApproval;
-  }
-
-  // Team methods
-  async getTeam(id: number): Promise<Team | undefined> {
-    return this.teams.get(id);
-  }
-
-  async getTeamsByManager(managerId: number): Promise<Team[]> {
-    return Array.from(this.teams.values()).filter(team => team.managerId === managerId);
-  }
-
-  async createTeam(insertTeam: InsertTeam): Promise<Team> {
-    const team: Team = {
-      ...insertTeam,
-      id: this.currentTeamId++,
-      createdAt: new Date(),
-    };
-    this.teams.set(team.id, team);
-    return team;
-  }
-
-  async getTeamMembers(teamId: number): Promise<User[]> {
-    const memberIds = Array.from(this.teamMembers.values())
-      .filter(tm => tm.teamId === teamId)
-      .map(tm => tm.userId);
-    
-    return Array.from(this.users.values())
-      .filter(user => memberIds.includes(user.id));
-  }
-
-  async addTeamMember(insertTeamMember: InsertTeamMember): Promise<TeamMember> {
-    const teamMember: TeamMember = {
-      ...insertTeamMember,
-      id: this.currentTeamMemberId++,
-      createdAt: new Date(),
-    };
-    this.teamMembers.set(teamMember.id, teamMember);
-    return teamMember;
-  }
-
-  async removeTeamMember(teamId: number, userId: number): Promise<boolean> {
-    const teamMember = Array.from(this.teamMembers.values())
-      .find(tm => tm.teamId === teamId && tm.userId === userId);
-    
-    if (!teamMember) return false;
-    return this.teamMembers.delete(teamMember.id);
+    this.exchanges.set(id, updatedExchange);
+    return updatedExchange;
   }
 }
 
