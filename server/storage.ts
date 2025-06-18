@@ -1,49 +1,65 @@
-import { users, expenses, approvals, teams, teamMembers, type User, type InsertUser, type Expense, type InsertExpense, type Approval, type InsertApproval, type Team, type InsertTeam, type TeamMember, type InsertTeamMember } from "@shared/schema";
+import { 
+  users, skills, matches, sessions, messages, exchanges,
+  type User, type InsertUser, type Skill, type InsertSkill, 
+  type Match, type InsertMatch, type Session, type InsertSession,
+  type Message, type InsertMessage, type Exchange, type InsertExchange
+} from "@shared/schema";
 
 export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   
-  // Expense methods
-  getExpense(id: number): Promise<Expense | undefined>;
-  getExpensesByUser(userId: number): Promise<Expense[]>;
-  getExpensesByStatus(status: string): Promise<Expense[]>;
-  getExpensesByTeam(teamId: number): Promise<Expense[]>;
-  createExpense(expense: InsertExpense): Promise<Expense>;
-  updateExpense(id: number, updates: Partial<Expense>): Promise<Expense | undefined>;
-  deleteExpense(id: number): Promise<boolean>;
+  // Skill methods
+  getSkill(id: number): Promise<Skill | undefined>;
+  getSkillsByUser(userId: number): Promise<Skill[]>;
+  getSkillsByType(type: string): Promise<Skill[]>;
+  createSkill(skill: InsertSkill): Promise<Skill>;
+  updateSkill(id: number, updates: Partial<Skill>): Promise<Skill | undefined>;
+  deleteSkill(id: number): Promise<boolean>;
   
-  // Approval methods
-  getApproval(id: number): Promise<Approval | undefined>;
-  getApprovalsByExpense(expenseId: number): Promise<Approval[]>;
-  getApprovalsByApprover(approverId: number): Promise<Approval[]>;
-  createApproval(approval: InsertApproval): Promise<Approval>;
-  updateApproval(id: number, updates: Partial<Approval>): Promise<Approval | undefined>;
+  // Match methods
+  getMatch(id: number): Promise<Match | undefined>;
+  getMatchesByUser(userId: number): Promise<Match[]>;
+  getMatchesByStatus(status: string): Promise<Match[]>;
+  createMatch(match: InsertMatch): Promise<Match>;
+  updateMatch(id: number, updates: Partial<Match>): Promise<Match | undefined>;
   
-  // Team methods
-  getTeam(id: number): Promise<Team | undefined>;
-  getTeamsByManager(managerId: number): Promise<Team[]>;
-  createTeam(team: InsertTeam): Promise<Team>;
-  getTeamMembers(teamId: number): Promise<User[]>;
-  addTeamMember(teamMember: InsertTeamMember): Promise<TeamMember>;
-  removeTeamMember(teamId: number, userId: number): Promise<boolean>;
+  // Session methods
+  getSession(id: number): Promise<Session | undefined>;
+  getSessionsByMatch(matchId: number): Promise<Session[]>;
+  getSessionsByUser(userId: number): Promise<Session[]>;
+  createSession(session: InsertSession): Promise<Session>;
+  updateSession(id: number, updates: Partial<Session>): Promise<Session | undefined>;
+  
+  // Message methods
+  getMessage(id: number): Promise<Message | undefined>;
+  getMessagesByMatch(matchId: number): Promise<Message[]>;
+  createMessage(message: InsertMessage): Promise<Message>;
+  
+  // Exchange methods
+  getExchange(id: number): Promise<Exchange | undefined>;
+  getExchangesByUser(userId: number): Promise<Exchange[]>;
+  createExchange(exchange: InsertExchange): Promise<Exchange>;
+  updateExchange(id: number, updates: Partial<Exchange>): Promise<Exchange | undefined>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
-  private expenses: Map<number, Expense>;
-  private approvals: Map<number, Approval>;
-  private teams: Map<number, Team>;
-  private teamMembers: Map<number, TeamMember>;
+  private skills: Map<number, Skill>;
+  private matches: Map<number, Match>;
+  private sessions: Map<number, Session>;
+  private messages: Map<number, Message>;
+  private exchanges: Map<number, Exchange>;
   private currentUserId: number;
-  private currentExpenseId: number;
-  private currentApprovalId: number;
-  private currentTeamId: number;
-  private currentTeamMemberId: number;
+  private currentSkillId: number;
+  private currentMatchId: number;
+  private currentSessionId: number;
+  private currentMessageId: number;
+  private currentExchangeId: number;
 
   constructor() {
     this.users = new Map();
@@ -125,8 +141,15 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const user: User = {
-      ...insertUser,
       id: this.currentUserId++,
+      username: insertUser.username,
+      email: insertUser.email,
+      password: insertUser.password,
+      firstName: insertUser.firstName,
+      lastName: insertUser.lastName,
+      role: insertUser.role || "agent",
+      department: insertUser.department || null,
+      profilePicture: insertUser.profilePicture || null,
       createdAt: new Date(),
     };
     this.users.set(user.id, user);
@@ -166,13 +189,19 @@ export class MemStorage implements IStorage {
 
   async createExpense(insertExpense: InsertExpense): Promise<Expense> {
     const expense: Expense = {
-      ...insertExpense,
       id: this.currentExpenseId++,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      userId: insertExpense.userId,
+      title: insertExpense.title,
+      description: insertExpense.description || null,
+      amount: insertExpense.amount,
+      category: insertExpense.category,
+      receiptUrl: insertExpense.receiptUrl || null,
+      status: insertExpense.status || "pending",
       approvedBy: null,
       approvedAt: null,
       submittedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
     this.expenses.set(expense.id, expense);
     return expense;
@@ -210,8 +239,11 @@ export class MemStorage implements IStorage {
 
   async createApproval(insertApproval: InsertApproval): Promise<Approval> {
     const approval: Approval = {
-      ...insertApproval,
       id: this.currentApprovalId++,
+      expenseId: insertApproval.expenseId,
+      approverId: insertApproval.approverId,
+      status: insertApproval.status,
+      comments: insertApproval.comments || null,
       createdAt: new Date(),
     };
     this.approvals.set(approval.id, approval);
