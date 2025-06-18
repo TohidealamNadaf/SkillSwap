@@ -14,18 +14,16 @@ import { useAuth } from "@/hooks/use-auth";
 import { login, register } from "@/lib/auth";
 
 const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
+  email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 });
 
 const registerSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  role: z.string().min(1, "Role is required"),
-  department: z.string().optional(),
+  name: z.string().min(1, "Name is required"),
+  bio: z.string().optional(),
+  location: z.string().optional(),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -40,7 +38,7 @@ export default function Login() {
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
@@ -48,13 +46,11 @@ export default function Login() {
   const registerForm = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      username: "",
       email: "",
       password: "",
-      firstName: "",
-      lastName: "",
-      role: "",
-      department: "",
+      name: "",
+      bio: "",
+      location: "",
     },
   });
 
