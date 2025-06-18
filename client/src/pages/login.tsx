@@ -148,10 +148,10 @@ export default function Login() {
               </Form>
               
               <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <p className="text-sm text-blue-700 dark:text-blue-300 font-medium mb-2">Demo Accounts:</p>
+                <p className="text-sm text-blue-700 dark:text-blue-300 font-medium mb-2">Get Started:</p>
                 <div className="space-y-1 text-xs text-blue-600 dark:text-blue-400">
-                  <p>Manager: username: <code>manager</code> password: <code>password123</code></p>
-                  <p>Agent: username: <code>agent</code> password: <code>password123</code></p>
+                  <p>Create an account to start sharing and learning skills</p>
+                  <p>Add skills you can teach and skills you want to learn</p>
                 </div>
               </div>
             </TabsContent>
