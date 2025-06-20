@@ -1,4 +1,4 @@
-# Expense Management System
+# SkillSwap: A Skill Barter System
 
 ## Overview
 
